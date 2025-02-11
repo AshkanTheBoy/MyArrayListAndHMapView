@@ -1,8 +1,3 @@
-/*
-	This ArrayList implementation is just a joke.
-	It will contain an ArrayList as internal structure.
-*/
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.io.BufferedReader;
