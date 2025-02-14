@@ -429,9 +429,11 @@ public class MyArrayListImpl{
             input = br.readLine(); 
             if (!input.equals("b")){
 				try {
+					//check if the input is a positive Integer
 					int index = checkPositiveInteger(input);
 					al.remove(index);
 				} catch (WrongInputException | IndexOutOfBoundsException e){
+					//if index out of range or wrong input - try again
 					System.out.println(e.getMessage());
 				}
             }
@@ -439,18 +441,18 @@ public class MyArrayListImpl{
     }
 
 	public static int checkPositiveInteger(String input) throws WrongInputException{
-		int inputValue = checkNumericValue(input);
+		int inputValue = checkNumericValue(input); //check, if the input is an Integer value
 		if (inputValue<0){
 			System.out.println();
 			System.out.println("Wrong input\nIt should be a positive integer");
 			throw new WrongInputException(input);
 		}
-		return inputValue;
+		return inputValue; //return the value if ok
 	}
 
 	public static int checkNumericValue(String input) throws WrongInputException{
 		try {
-			return Integer.parseInt(input);
+			return Integer.parseInt(input); //parse the input here and return as int value
 		} catch (NumberFormatException e){
 			System.out.println();
 			System.out.println("Wrong input\nIt should be a numeric value");
@@ -459,6 +461,8 @@ public class MyArrayListImpl{
 	}
 }
 
+//My real ArrayList implementation.
+//Should work fine with other datatypes
 class MyArrayListReal<T>{
     private Object[] elements;
     
@@ -477,7 +481,7 @@ class MyArrayListReal<T>{
     }
 
     private Object[] grow(){
-        capacity*=2;
+        capacity*=2; //twice the capacity with each grow. Not optimal, but simple
         return elements = Arrays.copyOf(elements,capacity);
     }
 
@@ -493,9 +497,9 @@ class MyArrayListReal<T>{
         if (size==capacity){
             elements = grow();
         }
-		if (index!=0||size!=0){
+		if (index!=0||size!=0){ //allows us to skip the bounds check if inserting at 0 with 0 size
 			checkBounds(index);
-			System.arraycopy(elements,index,elements,index+1,size-index);
+			System.arraycopy(elements,index,elements,index+1,size-index); //shift the elements to the right to free the index
 		}
         elements[index] = element;
         size++;
@@ -518,9 +522,9 @@ class MyArrayListReal<T>{
 
     public void remove(int index) throws IndexOutOfBoundsException {
         checkBounds(index);
-        System.arraycopy(elements,index+1,elements,index,size-index-1);
+        System.arraycopy(elements,index+1,elements,index,size-index-1); //shift elements to the left
         size--;
-        elements[size] = null;
+        elements[size] = null; //delete the last element, as it is a copy of the last element after shifting
     }
 
     public int size(){
@@ -538,6 +542,7 @@ class MyArrayListReal<T>{
         }
     }
 
+	//just putting pipes instead of square brackets and commas
     public String toString(){
         int index = 0;
         
@@ -563,6 +568,8 @@ class MyArrayListReal<T>{
 }
 
 
+//joke ArrayList implementation.
+//just wraps the ArrayList and uses it's methods
 class MyArrayListJoke<T>{
     private ArrayList<T> list;
 
@@ -607,6 +614,7 @@ class MyArrayListJoke<T>{
     }
 }
 
+//custom Exception class for the wrong user input
 class WrongInputException extends Exception{
     String message;
 
@@ -622,6 +630,8 @@ class WrongInputException extends Exception{
     }
 }
 
+//class for the HashMap show.
+//Forces to be in the [1] bin.
 class SameHash{
     int val = 1;
 
