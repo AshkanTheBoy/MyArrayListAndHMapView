@@ -1,12 +1,46 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map.Entry;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
+/*
+	Interactive console app.
+	"joke" - shows my joke ArrayList implementation, 
+		as it is just a wrapper for a built-in ArrayList and uses it's functions.
+	"real" - allows you to manualy use my real ArrayList's functions:
+		you can set it's capacity, add elements to the end, insert elements,
+		change existing elements and remove existing elements.
+		Also, you can look at the elements count and capacity of the list,
+		as well, as look at it's internal array, which holds them.
+		This console app operates only with Integer values,
+			because i would have to implement many types of behaviour.
+		So i settled on an Integer.
+	"map" - shows the bin type of the HashMap with different elements count.
+		I don't know, what depends on the untreeify trigger,
+			because it reliably converts a bin into a tree at 9 elements,
+			but it doesn't convert it back exactly after we cross the 6 elements threshold.
+ */
 public class MyArrayListImpl{
     public static void main(String[] args) throws IOException {
+		/*
+		 * Uncomment to test a different datatype with my implementation
+			MyArrayListReal<String> al = new MyArrayListReal<>();
+			al.add("123");
+			al.add("qwe");
+			al.add("$#");
+			System.out.println(al);
+			al.remove(1);
+			System.out.println(al);
+			al.add(0,"hhh");
+			System.out.println(al);
+		*/
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
         while (!input.equals("quit")){
@@ -18,7 +52,7 @@ public class MyArrayListImpl{
                 "\"quit\" - quit the program%n");
             System.out.println("____________________________________");
             input = "";
-            while (input.isEmpty()){
+            while (input.isEmpty()){ //if input is empty - don't do anything and just reread the input
                 input = br.readLine().toLowerCase();	
             }
             if (input.equals("joke")){
@@ -27,9 +61,13 @@ public class MyArrayListImpl{
             if (input.equals("real")){
                 showRealList();
             }
+			if (input.equals("map")){
+				showMapStructure();
+			}
         }
     }
 
+	//function to show my joke implementation
     public static void showJokeList(){
         ArrayList<Integer> al = new ArrayList<>();
         al.add(1);
@@ -53,12 +91,15 @@ public class MyArrayListImpl{
         System.out.println("____________________________________");
     }
 
+	//function to start with the real implementation
     public static void showRealList() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
 		int initialCapacity = 0;
+		//using try-catch here to let the user go back to the main menu,
+		//if "b/B" is the input.
 		try {
-			initialCapacity = setCapacityLoop(br,input);
+			initialCapacity = setCapacityLoop(br,input); //initial list's capacity, 10 by default
 			MyArrayListReal<Integer> al = new MyArrayListReal<Integer>(initialCapacity);
 			while (!input.equals("0")){
 				input = displayMenu(br);
@@ -105,13 +146,73 @@ public class MyArrayListImpl{
 				if (input.equals("9")){
 					System.out.println("____________________________________");
 					System.out.println();
-					System.out.println(al.showInternals());
+					System.out.println(al.showInternals()); //show the internal array
 					System.out.println("____________________________________");
 				}
 			}
-		} catch (WrongInputException e){}
+			//if input is "b"/"B" - the error will be caught
+			//which allows us to leave this method and go back to the main menu loop
+		} catch (WrongInputException e){} 
         
     }
+
+	//method to show hashmap's bin structure
+	public static void showMapStructure(){
+		Map<SameHash, Integer> map = new HashMap<>(64);
+        LinkedHashSet<String> classes;
+        SameHash sh1 = new SameHash(1);
+        SameHash sh2 = new SameHash(1);
+        SameHash sh3 = new SameHash(1);
+        SameHash sh4 = new SameHash(1);
+        SameHash sh5 = new SameHash(1);
+        SameHash sh6 = new SameHash(1);
+        SameHash sh7 = new SameHash(1);
+        SameHash sh8 = new SameHash(1);
+        SameHash sh9 = new SameHash(1);
+        map.put(sh1,1);
+        map.put(sh2,2);
+        map.put(sh3,3);
+        map.put(sh4,4);
+        map.put(sh5,5);
+        map.put(sh6,6);
+        map.put(sh7,7);
+        map.put(sh8,8);
+        classes = new LinkedHashSet<>();
+        for (Map.Entry entry : map.entrySet()) {
+            classes.add(entry.getClass().getSimpleName());
+        }
+		System.out.println("____________________________________");
+		System.out.println("\nInserting 8 elements...");
+        System.out.println("Elements count: " + map.entrySet().size()
+                + "; Bin type: " + classes.getFirst());
+        map.put(sh9,9);
+        classes = new LinkedHashSet<>();
+        for (Map.Entry entry : map.entrySet()) {
+            classes.add(entry.getClass().getSimpleName());
+        }
+		System.out.println("\nInserting a 9th element to trigger treeify...");
+        System.out.println("Elements count: " + map.entrySet().size()
+                + "; Bin type: " + classes.getFirst());
+        map.remove(sh9);
+        map.remove(sh8);
+        map.remove(sh7);
+        map.remove(sh6);
+		//should untreeify here, as we delete 6th element and cross the threshold
+		//but it doesn't
+		//moreover, it depends on the environment
+		//because if I do that in IDEA - it untreeifies after the 5th element
+		//using console it does that after the 4th for me
+        map.remove(sh5);
+        map.remove(sh4);
+        classes = new LinkedHashSet<>();
+        for (Map.Entry entry : map.entrySet()) {
+            classes.add(entry.getClass().getSimpleName());
+        }
+		System.out.println("\nDeleting some elements to trigger untreeify...");
+        System.out.println("Elements count: " + map.entrySet().size()
+                + "; Bin type: " + classes.getFirst());
+		System.out.println("____________________________________");
+	}
 
     public static String displayMenu(BufferedReader br) throws IOException {
         System.out.println("____________________________________");
@@ -126,7 +227,7 @@ public class MyArrayListImpl{
                 "8 - Show all elements of the list%n"+
                 "9 - Show the internal structure of the list%n");
         System.out.println("____________________________________");
-        return br.readLine();
+        return br.readLine(); //return the input
     }
 
     public static int setCapacityLoop(BufferedReader br, String input) throws IOException,WrongInputException {
@@ -142,15 +243,17 @@ public class MyArrayListImpl{
             System.out.println("____________________________________");
             input = br.readLine();
             if (input.toLowerCase().equals("b")){
-				throw new WrongInputException(input);
+				//throw this, to get back to the main menu
+				throw new WrongInputException(input); 
             }
-            if (input.isEmpty()){
+            if (input.isEmpty()){ //empty input - set default capacity of 10
                 initialCapacity = 0;
             } else {
 				try {
+					//check if the input is a positive Integer
 					inputValue = checkPositiveInteger(input);
 					initialCapacity = inputValue;
-				} catch (WrongInputException e){
+				} catch (WrongInputException e){ //if caught - print the message and try again
 					System.out.println(e);
 					continue;
 				}
@@ -176,9 +279,11 @@ public class MyArrayListImpl{
             input = br.readLine();   		
             if (!input.equals("b")){
 				try {
+					//check if the input is an Integer
 					val = checkNumericValue(input);
 					al.add(val);
 				} catch (WrongInputException e){
+					//if caught - print the message and try again
 					System.out.println(e);
 				}
             }
@@ -199,11 +304,14 @@ public class MyArrayListImpl{
             input = br.readLine(); 
             if (!input.equals("b")){
 				try {
+					//check if the input is a positive Integer
 					index = checkPositiveInteger(input);
-					if (index!=0&&al.size()!=0){
-						al.checkBounds(index);
+					//this allows us to skip the bounds check and insert at 0, if the size is also 0
+					if (index!=0||al.size()!=0){
+						al.checkBounds(index); //check if the index is in the list range
 					}
 				} catch (WrongInputException | IndexOutOfBoundsException e){
+					//if wrong input or index not in range - try again
 					System.out.println(e.getMessage());
 					continue;
 				}
@@ -218,14 +326,17 @@ public class MyArrayListImpl{
                     evenAnotherInput = br.readLine();
                     if (!evenAnotherInput.equals("b")){
 						try {
+							//check if the input is an Integer
 							value = checkNumericValue(evenAnotherInput);
 						} catch (WrongInputException e){
 							System.out.println(e);
 							continue;
 						}
 						try {
-							al.add(index,value);
+							al.add(index,value); 
 						} catch (IndexOutOfBoundsException e){}
+						//the error never will be thrown, because we've already checked the bounds
+						//it's just so you get the error at the index input stage, not here
                         break;
                     }
                 }
@@ -245,13 +356,14 @@ public class MyArrayListImpl{
             input = br.readLine(); 
             if (!input.equals("b")){
 				try {
+					//check if the input is a positive Integer
 					int index = checkPositiveInteger(input);
 					System.out.println("____________________________________");
 					System.out.println("ELEMENT => "+al.get(index));
 					System.out.println("____________________________________");
 				} catch (WrongInputException | IndexOutOfBoundsException e){
+					//if caught an error - try again
 					System.out.println(e.getMessage());
-					continue;
 				}
             }
         }
@@ -271,6 +383,7 @@ public class MyArrayListImpl{
             input = br.readLine(); 
             if (!input.equals("b")){
 				try {
+					//check if the input is a positive Integer and inside the list range
 					index = checkPositiveInteger(input);
 					al.checkBounds(index);
 				} catch (WrongInputException | IndexOutOfBoundsException e){
@@ -294,6 +407,7 @@ public class MyArrayListImpl{
 							continue;
 						}
 						try {
+							//no error here, we just throw the index error earlier
 							al.set(index,value);
 						} catch (IndexOutOfBoundsException e){}
                         break;
@@ -319,7 +433,6 @@ public class MyArrayListImpl{
 					al.remove(index);
 				} catch (WrongInputException | IndexOutOfBoundsException e){
 					System.out.println(e.getMessage());
-					continue;
 				}
             }
         }
@@ -380,7 +493,7 @@ class MyArrayListReal<T>{
         if (size==capacity){
             elements = grow();
         }
-		if (index!=0&&size!=0){
+		if (index!=0||size!=0){
 			checkBounds(index);
 			System.arraycopy(elements,index,elements,index+1,size-index);
 		}
@@ -507,4 +620,23 @@ class WrongInputException extends Exception{
     public String toString(){
         return message;
     }
+}
+
+class SameHash{
+    int val = 1;
+
+    public SameHash(int val){
+        this.val = val;
+    }
+
+    @Override
+    public int hashCode(){
+        return 1;
+    }
+
+    @Override
+    public String toString(){
+        return String.valueOf(val);
+    }
+
 }
